@@ -10,12 +10,23 @@ class PostsController < ApplicationController
 
   # GET /posts/1
   def show
-    render json: @post
+    render json: @post.as_json(include: :images).merge(
+      images: @post.images.map do |image|
+        url_for(image)
+      end,
+    )
   end
 
   # POST /posts
   def create
-    @post = Post.new(post_params)
+    @post = Post.new(post_params.except(:images))
+    images = params[:post][:images]
+
+    if images
+      images.each do |image|
+        @post.images.attach(image)
+      end
+    end
 
     if @post.save
       render json: @post, status: :created, location: @post
@@ -26,7 +37,7 @@ class PostsController < ApplicationController
 
   # PATCH/PUT /posts/1
   def update
-    if @post.update(post_params)
+    if @post.save(post_params)
       render json: @post
     else
       render json: @post.errors, status: :unprocessable_entity
@@ -39,13 +50,14 @@ class PostsController < ApplicationController
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_post
-      @post = Post.find(params[:id])
-    end
 
-    # Only allow a list of trusted parameters through.
-    def post_params
-      params.fetch(:post, {})
-    end
+  # Use callbacks to share common setup or constraints between actions.
+  def set_post
+    @post = Post.find(params[:id])
+  end
+
+  # Only allow a list of trusted parameters through.
+  def post_params
+    params.require(:post).permit(images: [])
+  end
 end
