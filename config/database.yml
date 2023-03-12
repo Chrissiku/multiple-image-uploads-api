@@ -1,0 +1,19 @@
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  username: <%= ENV['DB_USERNAME'] %>
+  password: <%= ENV['DB_PASSWORD'] %>
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+
+development:
+  <<: *default
+  database: multiple_image_uploads_development
+
+  <<: *default
+  database: multiple_image_uploads_test
+
+production:
+  <<: *default
+  database: multiple_image_uploads_production
+  username: multiple_image_uploads
+  password: <%= ENV["MULTIPLE_IMAGE_UPLOADS_DATABASE_PASSWORD"] %>
