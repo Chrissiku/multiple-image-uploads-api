@@ -1,5 +1,5 @@
 class PostsController < ApplicationController
-  before_action :set_post, only: %i[ show update destroy ]
+  before_action :set_post, only: %i[show update destroy]
 
   # GET /posts
   def index
@@ -17,18 +17,20 @@ class PostsController < ApplicationController
     )
   end
 
-  # POST /posts
   def create
+    # The `Post` model should be defined or required in this file.
     @post = Post.new(post_params.except(:images))
-    images = params[:post][:images]
 
-    if images
-      images.each do |image|
-        @post.images.attach(image)
-      end
-    end
-
+    # The `save` method should be called after images have been attached.
     if @post.save
+      images = params[:post][:images]
+
+      if images
+        images.each do |image|
+          @post.images.attach(image)
+        end
+      end
+
       render json: @post, status: :created, location: @post
     else
       render json: @post.errors, status: :unprocessable_entity
@@ -37,7 +39,7 @@ class PostsController < ApplicationController
 
   # PATCH/PUT /posts/1
   def update
-    if @post.save(post_params)
+    if @post.update(post_params)
       render json: @post
     else
       render json: @post.errors, status: :unprocessable_entity
